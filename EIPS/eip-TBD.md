@@ -37,7 +37,7 @@ For every ERC-721 transfer, *except* for initial mint, the set of the correspond
 
 Royalty payment by the new token owner MUST be accepted by the token contract via a dedicated function, `TBD()`.
 Upon receipt of royalties, the take-back set MUST be emptied (i.e. transfer permissions collapse back to standard ERC-721 rules).
-After each token transfer, there SHOULD be a grace period during which the token is frozen and take-backs are disabled to allow the new owner to decide whether to either pay the royalty or allow the take-back set to grow. If such a grace period is implemented, tokens MUST be unfrozen if and when royalties are received.
+After each token transfer, there SHOULD be a grace period during which the token is frozen and take-backs are disabled to allow the new owner to decide to either pay the royalty or allow the take-back set to grow. If such a grace period is implemented, tokens MUST be unfrozen if and when royalties are received.
 
 In addition to clearing the take-back set, receipt of royalties MUST begin a temporary window during which *any* address MAY purchase the token for a price that is a function of the royalty received (which can be viewed as the inverse of the `royaltyInfo()` function of ERC-2981).
 This process is referred to as *auto-listing* and is not limited to addresses in the take-back set.
@@ -47,7 +47,7 @@ Implementations MAY specify the duration of the auto-listing window at their dis
 In the event of a sale due to an auto-listing:
 
 1. The token MUST be transferred to the address paying the auto-listing price;
-2. The price MUST be transferred to the token owner;
+2. The price MUST be transferred to the original token owner;
 3. The corresponding royalties MUST be reimbursed (i.e. the same address receives both the royalties and the sale price); and
 4. The new owner MUST be subject to the same mechanism rules; i.e. take-back, royalty payment, and auto-listing.
 
