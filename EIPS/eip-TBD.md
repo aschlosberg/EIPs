@@ -42,7 +42,7 @@ So, upon token transfer, contracts are unaware of the nature of the transfer (e.
 Contracts therefore have to rely on external parties to supply this information which can either be gamed if the involved parties are dishonest or introduce centralisation.
 This problem is aggravated in OTC deals, where the flow of funds can be handled entirely via separate channels that are unknown or intransparent to any third party.
 
-On-chain royalty enforcement are still feasible in practice though by creating a sufficiently strong incentive or penalty to force participating parties to provide honest information.
+On-chain royalty enforcement can still be feasible in practice though by creating a sufficiently strong incentive or penalty to force participating parties to provide honest information.
 To also account for OTC deals, we devise a mechanism that targets the primary actors in a transfer (i.e. the previous and new token owner) as parties to supply the information required for enforcement, and forces them to reveal it truthfully.
 
 <!--
