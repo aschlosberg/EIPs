@@ -1,8 +1,8 @@
 ---
 title: On-chain NFT royalty enforcement
-description: Hello world
+description: A game-theoretic mechanism to induce truthful revelation of NFT sales and their value to allow for decentralised royalty enforcement.
 author: David Huber (@cxkoda), Arran Schlosberg (@aschlosberg)
-discussions-to: <URL>
+discussions-to: https://ethereum-magicians.org/t/eip-xxxx-on-chain-nft-royalty-enforcement/15917
 status: Draft
 type: Standards Track
 category: ERC
@@ -12,7 +12,7 @@ requires: 165, 721
 
 ## Abstract
 
-We describe a mechanism for which, upon transfer of an [ERC-721](./eip-721.md) Non-Fungible Token (NFT), the dominant strategy of the new owner is to truthfully reveal if the owning entity has changed and, if so, (a) report their valuation of the token and (b) pay a creator-specified royalty based on said valuation.
+We describe a mechanism for which, upon transfer of an [ERC-721](./eip-721.md) Non-Fungible Token (NFT), the dominant strategy of the new owner is to truthfully reveal if the owning entity has changed and, if so, report their valuation of the token and pay a creator-specified royalty based on said valuation.
 
 ## Motivation
 
@@ -21,7 +21,7 @@ It goes so far as to state that "payment must be voluntary, as transfer mechanis
 
 The difficulty with on-chain enforcement stems from the incomplete information available to enforcement contracts.
 Such contracts are unaware of both the nature of token transfers (e.g. sale, private, gift, etc.) and any corresponding flow of funds (e.g. sales price), which are commonly needed to compute the royalty to be paid to the creator.
-Until now, contracts have therefore relied on external parties to supply this information, which can either introduce centralisation, or be manipulated if the involved parties are dishonest.
+Contracts have therefore relied on external parties to supply this information, which can either introduce centralisation, or be manipulated if the involved parties are dishonest.
 This problem is aggravated in over-the-counter (OTC) deals because the flow of funds can be handled entirely via hidden channels.
 
 On-chain royalty enforcement can still be feasible in practice though by creating a sufficiently strong incentive or penalty to force participating parties to provide honest information.
@@ -37,20 +37,25 @@ For every ERC-721 transfer, *except* for initial mint, the set of the correspond
 
 Royalty payment by the new token owner MUST be accepted by the token contract via a dedicated function, `TBD()`.
 Upon receipt of royalties, the take-back set MUST be emptied (i.e. transfer permissions collapse back to standard ERC-721 rules).
-After each token transfer, there SHOULD be a grace period during which the token is frozen and take-backs are disabled to allow the new owner to decide whether to either pay the royalty or allow the take-back set to grow.
+After each token transfer, there SHOULD be a grace period during which the token is frozen and take-backs are disabled to allow the new owner to decide whether to either pay the royalty or allow the take-back set to grow. If such a grace period is implemented, tokens MUST be unfrozen if and when royalties are received.
 
 In addition to clearing the take-back set, receipt of royalties MUST begin a temporary window during which *any* address MAY purchase the token for a price that is a function of the royalty received (which can be viewed as the inverse of the `royaltyInfo()` function of ERC-2981).
 This process is referred to as *auto-listing* and is not limited to addresses in the take-back set.
 The token MUST NOT be transferrable for the duration of the auto-listing.
 Implementations MAY specify the duration of the auto-listing window at their discretion but it MUST be finite and SHOULD be long enough to allow arbitrage opportunities to be detected and, after expiration, transfer permissions MUST collapse back to standard ERC-721 rules.
 
-In the event of a sale due to an auto-listing, (a) the corresponding royalties MUST be reimbursed, (b) the auto-listing price MUST be transferred to the token owner (i.e. the same address receives both the royalties and the sale price), and (c) the token MUST be transferred to the address paying the price.
-The new owner MUST be subject to the same mechanism rules; i.e. take-back, royalty payment, and auto-listing.
+In the event of a sale due to an auto-listing:
+
+1. The token MUST be transferred to the address paying the auto-listing price;
+2. The price MUST be transferred to the token owner;
+3. The corresponding royalties MUST be reimbursed (i.e. the same address receives both the royalties and the sale price); and
+4. The new owner MUST be subject to the same mechanism rules; i.e. take-back, royalty payment, and auto-listing.
+
 If no sale occurs during the auto-listing window, the contract SHOULD transfer the royalty payment to the NFT creator.
 
-Marketplaces facilitating sales SHOULD forward royalties in the same transaction as the sale to guarantee payment within the grace period.
-Marketplaces MAY allow buyers to configure either the auto-listing price or the royalties paid (as they are equivalent), or they MAY provide sensible default values at their discretion.
-If allowing buyers to configure values, marketplaces SHOULD limit this to the auto-listing price for ease of understanding as royalties are effectively calculated on this value.
+Marketplaces facilitating sales SHOULD forward royalties in the same transaction as the sale to guarantee payment within the grace period, thus immediately unfreezing the token.
+Marketplaces MAY allow buyers to configure either the auto-listing price or the royalties paid (as they are equivalent), or they MAY provide sensible default values or employ more sophisticated heuristics at their discretion.
+If allowing buyers to configure values, marketplaces SHOULD limit this to the auto-listing price for ease of understanding as royalties are effectively calculated on this value via a process that is familiar to end users.
 
 ```solidity
 interface IERCTBD {
